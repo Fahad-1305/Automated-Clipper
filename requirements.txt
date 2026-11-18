@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+requests
+apscheduler
+google-api-python-client
+google-auth
+yt-dlp

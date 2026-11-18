@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ClipBot</title>
+  <style>
+    :root {
+      --bg: #0b0b12;
+      --card: #14141f;
+      --line: #262636;
+      --tx: #e8e8f2;
+      --mut: #8a8aa3;
+      --acc: #8b5cf6;
+      --ok: #34d399;
+      --bad: #f87171
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--tx);
+      font: 15px/1.5 system-ui, sans-serif
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 16px 28px;
+      border-bottom: 1px solid var(--line)
+    }
+
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+      color: var(--acc)
+    }
+
+    nav {
+      display: flex;
+      gap: 4px
+    }
+
+    nav button {
+      background: none;
+      border: 0;
+      color: var(--mut);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font: inherit
+    }
+
+    nav button.on {
+      background: var(--card);
+      color: var(--tx)
+    }
+
+    main {
+      max-width: 900px;
+      margin: 28px auto;
+      padding: 0 20px
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px
+    }
+
+    h2 {
+      font-size: 16px;
+      margin: 0 0 12px
+    }
+
+    label {
+      display: block;
+      color: var(--mut);
+      font-size: 13px;
+      margin: 10px 0 4px
+    }
+
+    input[type=text],
+    input[type=password],
+    input[type=number],
+    select {
+      width: 100%;
+      padding: 9px 11px;
+      background: #0d0d16;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--tx);
+      font: inherit
+    }
+
+    button.b {
+      background: var(--acc);
+      color: #fff;
+      border: 0;
+      padding: 9px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font: inherit
+    }
+
+    button.g {
+      background: none;
+      border: 1px solid var(--line);
+      color: var(--tx);
+      padding: 7px 12px;
+      border-radius: 8px;
+      cursor: pointer
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px
+    }
+
+    .pill {
+      font-size: 12px;
+      padding: 3px 9px;
+      border-radius: 99px;
+      border: 1px solid var(--line)
+    }
+
+    .ok {
+      color: var(--ok);
+      border-color: var(--ok)
+    }
+
+    .bad {
+      color: var(--bad);
+      border-color: var(--bad)
+    }
+
+    .st {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .st:last-child {
+      border: 0
+    }
+
+    .st img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%
+    }
+
+    .sp {
+      flex: 1
+    }
+
+    small,
+    .mut {
+      color: var(--mut)
+    }
+
+    pre {
+      background: #0d0d16;
+      border-radius: 8px;
+      padding: 12px;
+      max-height: 340px;
+      overflow: auto;
+      font-size: 12.5px;
+      margin: 0
+    }
+
+    code {
+      background: #0d0d16;
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 12.5px
+    }
+
+    .hide {
+      display: none
+    }
+
+    .warn {
+      border-color: #a16207;
+      background: #1c1608
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>ClipBot</h1>
+    <nav id="nav"></nav>
+  </header>
+  <main>
+    <section id="dashboard">
+      <div class="card">
+        <div class="row">
+          <h2 class="sp" style="margin:0">Status</h2>
+          <button class="b" id="runbtn" onclick="runNow()">Run now</button>
+        </div>
+        <div class="row" id="pills" style="margin-top:12px"></div>
+      </div>
+      <div class="card">
+        <h2>Activity</h2>
+        <pre id="log">…</pre>
+      </div>
+      <div class="card">
+        <h2>Recent posts</h2>
+        <div id="posted" class="mut">None yet</div>
+      </div>
+    </section>
+
+    <section id="streamers" class="hide">
+      <div class="card warn"><small>Only clip streamers who have agreed. A streamer is only clipped when "Permission
+          confirmed" is ticked. Every post credits and links to them.</small></div>
+      <div class="card">
+        <h2>Add streamer</h2>
+        <div class="row"><input type="text" id="newlogin" placeholder="Twitch username" style="flex:1">
+          <label style="margin:0;display:flex;gap:6px;align-items:center"><input type="checkbox" id="newperm">
+            Permission confirmed</label>
+          <button class="b" onclick="addStreamer()">Add</button>
+        </div><small id="serr" style="color:var(--bad)"></small>
+      </div>
+      <div class="card">
+        <h2>Streamers</h2>
+        <div id="slist"></div>
+      </div>
+    </section>
+
+    <section id="accounts" class="hide">
+      <div class="card">
+        <h2>Twitch (clip source)</h2><small>Create an app at dev.twitch.tv/console</small>
+        <div class="grid">
+          <div><label>Client ID</label><input type="text" id="c_twitch_client_id"></div>
+          <div><label>Client secret</label><input type="password" id="c_twitch_client_secret"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>YouTube</h2><small>Google Cloud → OAuth client (Web). Redirect URI: <code id="r_g"></code></small>
+        <div class="grid">
+          <div><label>Client ID</label><input type="text" id="c_google_client_id"></div>
+          <div><label>Client secret</label><input type="password" id="c_google_client_secret"></div>
+        </div>
+        <div class="row" style="margin-top:12px"><button class="g"
+            onclick="saveCreds().then(()=>location='/auth/google')">Connect YouTube</button>
+          <span id="yt_state"></span><button class="g hide" id="yt_dis" onclick="disc('youtube')">Disconnect</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Facebook Page + Instagram</h2><small>Meta developer app. Redirect URI: <code id="r_m"></code>. Instagram
+          must be a Business/Creator account linked to the Page.</small>
+        <div class="grid">
+          <div><label>App ID</label><input type="text" id="c_meta_app_id"></div>
+          <div><label>App secret</label><input type="password" id="c_meta_app_secret"></div>
+        </div>
+        <div class="row" style="margin-top:12px"><button class="g"
+            onclick="saveCreds().then(()=>location='/auth/meta')">Connect Facebook / Instagram</button>
+          <span id="meta_state"></span><button class="g hide" id="meta_dis" onclick="disc('meta')">Disconnect</button>
+        </div>
+        <div id="pagepick" class="hide"><label>Page to post to</label><select id="pagesel"
+            onchange="selectPage()"></select></div>
+      </div>
+      <button class="b" onclick="saveCreds().then(()=>alert('Saved'))">Save credentials</button>
+    </section>
+
+    <section id="settings" class="hide">
+      <div class="card">
+        <h2>Clip filters</h2>
+        <div class="grid">
+          <div><label>Game (blank = any)</label><input type="text" id="s_game_name"></div>
+          <div><label>Hashtags</label><input type="text" id="s_hashtags"></div>
+          <div><label>Lookback (hours)</label><input type="number" id="s_lookback_hours"></div>
+          <div><label>Min views</label><input type="number" id="s_min_views"></div>
+          <div><label>Max clip length (s)</label><input type="number" id="s_max_seconds"></div>
+          <div><label>Max posts per run</label><input type="number" id="s_max_posts_per_run"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Platforms</h2>
+        <div class="row">
+          <label><input type="checkbox" id="s_post_youtube"> YouTube</label>
+          <label><input type="checkbox" id="s_post_facebook"> Facebook</label>
+          <label><input type="checkbox" id="s_post_instagram"> Instagram</label>
+        </div>
+        <label>YouTube visibility</label><select id="s_youtube_privacy">
+          <option>private</option>
+          <option>unlisted</option>
+          <option>public</option>
+        </select>
+        <small>New Google API projects are forced to private until audited.</small>
+      </div>
+      <div class="card">
+        <h2>Automation</h2>
+        <div class="row">
+          <label><input type="checkbox" id="s_auto_run"> Run automatically every</label>
+          <input type="number" id="s_interval_minutes" style="width:90px"> <span class="mut">minutes (keep this app
+            running)</span>
+        </div>
+      </div>
+      <button class="b" onclick="saveSettings()">Save settings</button>
+    </section>
+  </main>
+  <script>
+    const $ = id => document.getElementById(id);
+    const api = async (p, m = 'GET', b) => {
+      const r = await fetch(p, { method: m, headers: { 'Content-Type': 'application/json' }, body: b ? JSON.stringify(b) : undefined });
+      if (!r.ok) { let e = ''; try { e = (await r.json()).detail } catch { } throw new Error(e || r.statusText) } return r.json()
+    };
+    const TABS = ['dashboard', 'streamers', 'accounts', 'settings'];
+    $('nav').innerHTML = TABS.map(t => `<button data-t="${t}" onclick="show('${t}')">${t[0].toUpperCase() + t.slice(1)}</button>`).join('');
+    function show(t) {
+      TABS.forEach(x => { $(x).classList.toggle('hide', x !== t) });
+      document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.t === t)); history.replaceState(0, '', '#' + t); refresh()
+    }
+    const pill = (t, ok) => `<span class="pill ${ok ? 'ok' : 'bad'}">${t}</span>`;
+    async function refresh() {
+      const st = await api('/api/status');
+      $('pills').innerHTML = pill('Twitch ' + (st.creds_set.twitch_client_id ? 'ready' : 'not set'), st.creds_set.twitch_client_id)
+        + pill('YouTube ' + (st.youtube_connected ? 'connected' : 'not connected'), st.youtube_connected)
+        + pill('Facebook ' + (st.meta_connected && st.selected_page ? 'connected' : 'not connected'), st.meta_connected && st.selected_page)
+        + pill('Instagram ' + (st.ig_username ? '@' + st.ig_username : 'not linked'), !!st.ig_username);
+      $('runbtn').disabled = st.running; $('runbtn').textContent = st.running ? 'Running…' : 'Run now';
+      $('r_g').textContent = st.redirects.google; $('r_m').textContent = st.redirects.meta;
+      $('yt_state').innerHTML = pill(st.youtube_connected ? 'Connected' : 'Not connected', st.youtube_connected); $('yt_dis').classList.toggle('hide', !st.youtube_connected);
+      $('meta_state').innerHTML = pill(st.meta_connected ? 'Connected' : 'Not connected', st.meta_connected); $('meta_dis').classList.toggle('hide', !st.meta_connected);
+      $('pagepick').classList.toggle('hide', !st.pages.length);
+      $('pagesel').innerHTML = '<option value="">Select a Page…</option>' + st.pages.map(p => `<option value="${p.id}" ${p.id === st.selected_page ? 'selected' : ''}>${p.name}${p.ig ? ' (IG @' + p.ig + ')' : ' (no IG linked)'}</option>`).join('');
+      for (const k in st.creds_set) { const el = $('c_' + k); if (el && st.creds_set[k]) el.placeholder = '•••• saved' }
+      const lg = await api('/api/log'); $('log').textContent = lg.map(l => l.ts + '  ' + l.msg).join('\n') || 'No activity yet';
+      const ps = await api('/api/posted'); $('posted').innerHTML = ps.length ? ps.map(p => `<div class="st"><span class="sp">${p.title}<br><small>${p.streamer} · ${p.ts}</small></span>${p.yt ? pill('YT', 1) : ''}${p.fb ? pill('FB', 1) : ''}${p.ig ? pill('IG', 1) : ''}</div>`).join('') : 'None yet';
+      loadStreamers();
+    }
+    async function loadStreamers() {
+      const l = await api('/api/streamers');
+      $('slist').innerHTML = l.length ? l.map(s => `<div class="st"><img src="${s.avatar}"><span class="sp">${s.name}<br><small>twitch.tv/${s.login}</small></span>
+   <label style="margin:0;display:flex;gap:6px;align-items:center"><input type="checkbox" ${s.permission ? 'checked' : ''} onchange="setPerm('${s.login}',this.checked)"> Permission confirmed</label>
+   <button class="g" onclick="delS('${s.login}')">Remove</button></div>`).join('') : '<span class="mut">No streamers yet</span>'
+    }
+    async function addStreamer() { $('serr').textContent = ''; try { await api('/api/streamers', 'POST', { login: $('newlogin').value, permission: $('newperm').checked }); $('newlogin').value = ''; loadStreamers() } catch (e) { $('serr').textContent = e.message } }
+    const setPerm = (l, v) => api('/api/streamers/' + l, 'PATCH', { permission: v });
+    const delS = async l => { await api('/api/streamers/' + l, 'DELETE'); loadStreamers() };
+    const CK = ['twitch_client_id', 'twitch_client_secret', 'google_client_id', 'google_client_secret', 'meta_app_id', 'meta_app_secret'];
+    async function saveCreds() { const b = {}; CK.forEach(k => b[k] = $('c_' + k).value); await api('/api/credentials', 'PUT', b); CK.forEach(k => $('c_' + k).value = '') }
+    const selectPage = async () => { if ($('pagesel').value) { await api('/api/meta/select', 'POST', { page_id: $('pagesel').value }); refresh() } };
+    const disc = async w => { await api('/api/disconnect/' + w, 'POST'); refresh() };
+    const runNow = async () => { try { await api('/api/run', 'POST') } catch (e) { alert(e.message) } setTimeout(refresh, 800) };
+    const SK = ['game_name', 'hashtags', 'lookback_hours', 'min_views', 'max_seconds', 'max_posts_per_run', 'post_youtube', 'post_facebook', 'post_instagram', 'youtube_privacy', 'auto_run', 'interval_minutes'];
+    async function loadSettings() { const s = await api('/api/settings'); SK.forEach(k => { const el = $('s_' + k); el.type === 'checkbox' ? el.checked = s[k] : el.value = s[k] }) }
+    async function saveSettings() { const b = {}; SK.forEach(k => { const el = $('s_' + k); b[k] = el.type === 'checkbox' ? el.checked : el.type === 'number' ? +el.value : el.value }); await api('/api/settings', 'PUT', b); alert('Saved') }
+    show((location.hash || '#dashboard').slice(1)); loadSettings(); setInterval(() => { if (!$('dashboard').classList.contains('hide')) refresh() }, 8000);
+  </script>
+</body>
+
+</html>
