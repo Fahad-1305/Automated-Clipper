@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ClipBot Dashboard
 
 Local web app: manage streamers, connect YouTube / Facebook / Instagram, and run or schedule clip posting.
@@ -26,3 +27,7 @@ Local web app: manage streamers, connect YouTube / Facebook / Instagram, and run
 - Auto-run only works while the app is running. For 24/7 use, host it on a small VPS behind a login or VPN.
 - YouTube forces uploads to private until Google audits your API project.
 - Instagram Reels posting uses resumable upload; in development mode it works for your own account.
+=======
+# Automated-Clipper
+An automated video clipping and social media publishing platform built with Python. Collects Twitch clips, processes video content, and streamlines publishing across YouTube, Instagram, and Facebook.
+>>>>>>> 787480adee5ab86b8a3de50bfaebc036a6a47cdb
